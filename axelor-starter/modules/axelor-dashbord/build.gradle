@@ -1,0 +1,16 @@
+apply plugin: 'axelor-module'
+
+module {
+	name "axelor-dashbord"
+	title "Axelor dashbord"
+	
+	version "1.0.0"
+	
+	description """Axelor dashbord module demo.
+
+This is a demo module to provide quick demonstration of some new features.
+    """
+
+	// module dependencies
+	 module "modules:axelor-sales"
+}

@@ -1,0 +1,4 @@
+// Include modules
+include "modules:axelor-contact"
+include "modules:axelor-sales"
+include "modules:axelor-dashbord"

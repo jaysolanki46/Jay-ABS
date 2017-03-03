@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_4.2.xsd">
+
+	<grid name="invoice-grid" title="Invoice List" model="com.axelor.sales.db.Invoice">
+		<field name="invoiceOrder"/>
+		<field name="invoiceDate"/>
+		<field name="state"/>
+	</grid>
+
+	<selection name="com.axelor.invoice.state">
+		<option value="Draft">Draft</option>
+		<option value="Confirm">Confirm</option>
+		<option value="Invoiced">Invoiced</option>
+		<option value="Paid">Paid</option>
+	</selection>
+
+ 
+	<form name="invoice-form" title="Invoice" model="com.axelor.sales.db.Invoice" onLoad="com.axelor.sales.web.SalesOrderController:defaultImage" onSave="path">
+		<toolbar>
+			<button name="btnPrint" title="Print" showTitle="false" showIf="id &amp;&amp; state == 'Confirm'" onClick="save,com.axelor.sales.web.SalesOrderController:path,com.axelor.sales.showInvoice.report" icon="fa-print"/>
+		</toolbar>
+		<panel title="Overview">
+				    <field name="name" title="ID" colSpan="6" readonly="true"/>
+				    <field name="invoiceDate" title="Invoice Date" readonly="true"/>
+				    <field name="state" readonly="true" colSpan="12" widget="NavSelect" selection="com.axelor.invoice.state"/>
+  		</panel>
+  		<panel css="panel-purple">
+			    <field name="invoiceOrder.customer" title="Customer"/>
+			    <field name="invoiceOrder.customer.email" title="Email"/>
+			    <field name="invoiceOrder.customer.addresses" title="Address" colSpan="12">
+		      <viewer><![CDATA[
+						{{record.street}},{{record.area}},<br>
+						{{record.city}}-{{record.zip}}
+					]]></viewer>
+		      <editor x-show-titles="false" editable="false">
+		        <field name="street" colSpan="1"/>
+		        <field name="area" colSpan="1"/>
+		        <field name="city" colSpan="1"/>
+		        <field name="zip" colSpan="1"/>
+     			 </editor>
+    			</field>
+ 		 </panel>
+ 		 
+			  <panel-related field="invoiceItems" colspan="12" editable="true" showTitle="false" readonlyIf="state == 'Paid'">
+			   				<field name="product"/>
+			   				<field name="quantity"/>
+			   				<field name="price"/>
+			   				<field name="tax"/>   							   		
+			  </panel-related>
+			  
+			  
+		<panel css="panel-purple" >
+			<field name="disAmount" title="Discount"  readonlyIf="state == 'Paid'"/>
+		</panel>	  
+		<panel>
+		 <panel css="panel-green" colSpan="4" itemSpan="12">
+			<button name="totalAmount" title="Total Amount" css="btn-success" widget="info-button" icon="fa-bar-chart" onClick="save,com.axelor.sales.web.SalesOrderController:calculateInvoice"/>
+		 </panel>
+		 
+				<panel showTitle="false" css="order-subtotal" readonly="true"  colSpan="8">
+						<field name="totalAmount" showTitle="false" colSpan="12">
+								<viewer>
+									<![CDATA[
+									<dl class="dl-horizontal">
+										<dt x-translate>Amount</dt>
+										<dd>{{record.amount}}</dd>
+										<dt x-translate>Tax Amount</dt>
+										<dd>{{record.taxAmount}}</dd>
+										<dt class="order-subtotal-total">Total Amount</dt>
+										<dd class="order-subtotal-total">{{record.totalAmount}}</dd>
+									</dl>
+									]]>
+								</viewer>					
+						</field>	
+								
+				<field name="invoiceTotalAmount" showTitle="false" colSpan="12">						
+						<viewer><![CDATA[
+						<dl class="dl-horizontal">
+							<dt x-translate>Discount Amount</dt>
+							<dd>{{record.disAmount}}</dd>
+							<dt class="order-subtotal-total">Invoice Amount</dt>
+							<dd class="order-subtotal-total">{{record.invoiceTotalAmount}}</dd>
+						</dl>	
+						]]>					
+						</viewer>			
+				</field>
+				</panel>
+		 	
+		</panel>	
+		<panel sidebar="true" title="Add Logo" css="panel-green">
+			<field name="image" colSpan="5" widget="image" showTitle="false" expr="call:com.axelor.sales.web.SalesOrderController:path"/>
+		</panel>
+		  
+		<panel sidebar="true" css="panel-black" showIf="state == 'Draft' || state == 'Confirm' || state == 'Invoiced'">
+			<button name="Confirm" title="Confirm" showIf="state == 'Draft'" onClick="save,com.axelor.invoice.changeState"/>
+			<button name="Invoiced" title="Invoiced" showIf="state == 'Confirm'" onClick="save,com.axelor.invoice.changeState"/>
+			<button name="Paid" title="Paid" showIf="state == 'Confirm' || state == 'Invoiced'" onClick="save,com.axelor.invoice.changeStateToPaid,com.axelor.invoice.changeState"/>
+		</panel>			  
+	</form>
+		<action-report output="so-${date}${time}" name="com.axelor.sales.showInvoice.report" design="invoiceReport.rptdesign" format="pdf">
+			<param name="invoiceId" expr="eval: name"/>	
+		</action-report>
+		
+		<action-record name="com.axelor.sales.invoice.default" model="com.axelor.sales.db.Invoice">
+			<field name="invoiceDate" expr="eval: __date__"/>
+		</action-record>	
+		<action-record name="com.axelor.invoice.changeState" model="com.axelor.sales.db.Invoice">
+			<field name="state" expr="Confirm" if="state == 'Draft'"/>
+			<field name="state" expr="Invoiced" if="state == 'Confirm'"/>
+			<field name="state" expr="Paid" if="state == 'Invoiced'"/>
+		</action-record>
+		<action-record name="com.axelor.invoice.changeStateToPaid" model="com.axelor.sales.db.Invoice">
+			<field name="state" expr="Paid" if="state == 'Invoiced' || state == 'Confirm'"/>
+		</action-record>
+
+</object-views>

@@ -1,0 +1,41 @@
+buildscript {
+	apply from: "gradle/adk.gradle"
+	dependencies {
+		classpath adkPlugins()
+	}
+}
+
+apply plugin: "axelor-app"
+
+application {
+
+	name "axelor-starter"
+	title "Axelor starter"
+
+	version "1.0.0"
+
+	// ADK version required
+	adkVersion "~4.2.0"
+
+	// module dependencies
+	module "modules:axelor-contact"
+	module "modules:axelor-sales"
+	module "modules:axelor-dashbord"
+}
+
+allprojects {
+
+	sourceCompatibility = 1.7
+	targetCompatibility = 1.7
+
+	license {
+		ext.product = "axelor-starter"
+		ext.owner = "My Company"
+		ext.website = "http://my-company.com"
+	}
+}
+
+tomcat {
+	httpPort = project.properties.get("http.port", 8080) as Integer
+	stopPort = 9451
+}

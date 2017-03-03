@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_4.2.xsd">
+
+  <grid name="contact-grid" title="Contacts" model="com.axelor.contact.db.Contact">
+    <field name="fullName" />
+    <field name="email" />
+    <field name="phone" />
+  </grid>
+
+  <form name="contact-form" title="Contact" model="com.axelor.contact.db.Contact" onNew="act.default.contact">
+    <panel title="Overview">
+      <panel colSpan="3" width="110">
+      	<field name="photo" colSpan="12" showTitle="false" />
+      </panel>
+      <panel colSpan="9">
+        <field name="fullName" title="Name" readonly="false" colSpan="12">
+          <editor x-show-titles="false">
+            <field name="title" colSpan="2"/>
+            <field name="firstName" colSpan="5"/>
+            <field name="lastName" colSpan="5"/>
+          </editor>
+        </field>
+        <field name="email"/>
+        <field name="phone"/>
+        <field name="circles" colSpan="12" widget="tag-select"/>
+      </panel>
+    </panel>
+    <panel-related field="addresses" editable="true">
+      <field name="street"/>
+      <field name="area"/>
+      <field name="city"/>
+      <field name="zip"/>
+    </panel-related>
+    <panel sidebar="true">
+      <field name="createdOn"/>
+      <field name="createdBy"/>
+      <field name="updatedOn"/>
+      <field name="updatedBy"/>
+    </panel>
+  </form>
+  
+  <action-record name="act.default.contact" model="com.axelor.contact.db.Contact">
+    <field name="title" expr="action: act.default.title" />
+    <field name="firstName" expr="My" />
+    <field name="lastName" expr="Name" />
+    <field name="addresses" expr="action: act.default.address" />
+  </action-record>
+  
+  <action-record name="act.default.title" model="com.axelor.contact.db.Title" search="self.code = :code">
+    <field name="code" expr="mr" />
+    <field name="name" expr="Mr." />
+  </action-record>
+  
+  <action-record name="act.default.address" model="com.axelor.contact.db.Address">
+    <field name="street" expr="My" />
+    <field name="area" expr="Home" />
+    <field name="city" expr="Paris" />
+  </action-record>
+
+</object-views>

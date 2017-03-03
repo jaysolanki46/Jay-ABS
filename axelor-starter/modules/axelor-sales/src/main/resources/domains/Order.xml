@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<domain-models xmlns="http://axelor.com/xml/ns/domain-models"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://axelor.com/xml/ns/domain-models http://axelor.com/xml/ns/domain-models/domain-models_4.2.xsd">
+
+  <module name="sales" package="com.axelor.sales.db"/>
+
+  
+	<sequence name="com.axelor.sale" increment="1" padding="5" prefix="SO" initial="0"/>	
+
+	  <entity name="Order"  sequential="true" >
+		    <string name="name" sequence="com.axelor.sale" readonly="true"/>
+		    <many-to-one name="customer" ref="com.axelor.contact.db.Contact"/>
+		    <date name="createDate" required="true"/>
+		    <date name="confirmDate"/>
+		    <date name="orderDate"/>
+		    <string name="state" required="true"/>
+			<decimal name="amount" precision="20" scale="4" min="0.0"/>
+			<decimal name="taxAmount" precision="20" scale="4" min="0.0"/>
+			<decimal name="totalAmount" precision="20" scale="4" min="0.0"/>
+			<string name="note" large="true"/>
+			<one-to-many name="items" ref="OrderItem" mappedBy="order" orderBy="price"/>			
+			<one-to-one name="invoice" ref="Invoice" mappedBy="invoiceOrder"/>    
+	  </entity>  
+</domain-models>

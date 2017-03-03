@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_4.2.xsd">
+
+	<grid name="chart-order-grid" title="Order Sales" model="com.axelor.sales.db.Order" css="panel-blue">
+		<field name="name"/>
+		<field name="customer"/>				
+		<field name="orderDate"/>
+		<field name="totalAmount"/>
+		<field name="state"/>
+	</grid>
+
+	<chart name="com.axelor.invoice.chart" title="Axelor Invoice By Customer" css="panel-blue">
+		<dataset type="sql">
+		<![CDATA[	
+				 	select sum(invoice.invoice_total_amount) as total,date_part('month',invoice.invoice_date) as month,contact.full_name as cust from sales_invoice as invoice
+					LEFT JOIN sales_order as o ON o.id=invoice.invoice_order 
+					LEFT JOIN contact_contact as contact ON contact.id=o.customer				
+					GROUP BY month,cust;
+		]]>		
+		</dataset>
+		<category key="month" type="month" />
+		<series key="total" groupBy="cust" type="bar" />
+	</chart>
+	
+	<chart name="com.axelor.salesOrder.chart" title="Axelor Sales" onInit="com.axelor.dashbord">
+		<search-fields>
+			<field name="fromDate" type="datetime" title="From Date"/>
+			<field name="toDate" type="datetime" title="To Date" />
+		</search-fields>
+		<dataset type="jpql">
+			<![CDATA[
+						select SUM(self.totalAmount) as total,MONTH(self.orderDate) as month,cust.fullName as name from Order self LEFT JOIN self.customer as cust 
+						WHERE YEAR(self.orderDate) = YEAR(current_date)
+						AND self.orderDate > :fromDate
+						AND self.orderDate < :toDate
+						group by cust,MONTH(self.orderDate)
+			]]>		
+			</dataset>
+		<category key="month" type="month" />
+		<series key="total" groupBy="name" type="hbar" />
+	</chart>
+	
+	 <chart name="com.axelor.month.chart" title="Axelor Monthly Invoice">
+		<dataset type="sql">
+			<![CDATA[
+					 	select sum(o.total_amount) as total,date_part('month',o.confirm_date) as month,contact.full_name as cust from sales_order as o
+						LEFT JOIN contact_contact as contact ON contact.id=o.customer
+						where date_part('year',o.confirm_date) = date_part('year',current_date)
+						GROUP BY month,cust;
+			]]>		
+			</dataset>
+		<category key="month" type="month" />
+		<series key="total" groupBy="cust" type="funnel" />
+	</chart> 
+	
+	 <chart name="com.axelor.salesByCustomer.chart" title="Axelor Sales By Customer">
+		<dataset type="sql">
+			<![CDATA[
+					 	select sum(o.total_amount) as total,contact.full_name as cust from sales_order as o
+						LEFT JOIN contact_contact as contact ON contact.id=o.customer
+						where date_part('year',o.confirm_date) = date_part('year',current_date)
+						GROUP BY cust;
+			]]>		
+			</dataset>
+		<category key="cust"/>
+		<series key="total" groupBy="cust" type="pie" />
+	</chart>
+	
+	<custom name="com.axelor.salesToday.view" title="Today Sales" css="report-box">
+		<dataset type="rpc">
+			com.axelor.dashboard.web.DashboardController:salesPerDay
+		</dataset>
+		<template>
+			<![CDATA[
+				<div class="report-data">
+					<h1>{{data[0]}}</h1>
+					<small>Total Sale</small>
+					<div class="report-percent font-bold text-info pull-right">{{data[1]}}
+					<i class="fa" ng-class="{'fa-level-up': data[2], 'fa-level-down': !data[2]}"></i></div>
+					<div class="report-tags"><span class="label" ng-class="{'label-success': data[2], 'label-important': !data[2]}">Today</span></div>
+				</div>
+			]]>	
+		</template>		
+	</custom>
+	
+	<custom name="com.axelor.salesMonth.view" title="This Month" css="report-box">
+		<dataset type="rpc">
+			com.axelor.dashboard.web.DashboardController:salesPerMonth
+		</dataset>
+		<template>
+			<![CDATA[
+				<div class="report-data">
+					<h1>{{data[0]}}</h1>
+					<small>Total Sale</small>
+					<div class="report-percent font-bold text-info pull-right">{{data[1]}}
+					<i class="fa" ng-class="{'fa-level-up': data[2], 'fa-level-down': !data[2]}"></i></div>
+					<div class="report-tags"><span class="label" ng-class="{'label-success': data[2], 'label-important': !data[2]}">Month</span></div>
+				</div>
+			]]>	
+		</template>		
+	</custom>
+	
+</object-views>

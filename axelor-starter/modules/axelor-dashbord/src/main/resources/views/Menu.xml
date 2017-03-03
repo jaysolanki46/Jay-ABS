@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_4.2.xsd">
+
+	<menuitem name="menu-dashboard" order="-1000" title="Dashboard" icon="fa-tachometer" icon-background="red" />
+
+	<menuitem name="menu-dashboardall" parent="menu-dashboard"
+    	title="All Dashboard"
+    	action="dashbord.all"/>
+
+	<dashboard name="com.axelor.invoice.chart.dashbord" title="Dashboard">
+		<dashlet action="custom:com.axelor.salesToday.view"/>
+		<dashlet action="custom:com.axelor.salesMonth.view"/>
+		<dashlet action="chart:com.axelor.invoice.chart"/>
+		<dashlet action="chart:com.axelor.salesOrder.chart"/>
+		<dashlet action="chart:com.axelor.month.chart"/>	
+		<dashlet action="chart:com.axelor.salesByCustomer.chart"/>	
+		<dashlet action="sale.orders" colSpan="12"/>		
+	</dashboard>
+
+	<action-view name="dashbord.all" title="Dashboard">
+	    <view type="dashboard" name="com.axelor.invoice.chart.dashbord"/>
+	 
+	</action-view> 
+
+	<action-view name="sale.orders" model="com.axelor.sales.db.Order" title="Sale Orders">
+	  	 <view type="grid"/>
+	  	 <view type="form"/>
+ 	 </action-view>
+
+ 	<action-record model="com.axelor.sales.db.Order" name="com.axelor.dashbord">
+ 		  <field name="fromDate" expr="eval:__date__.minusWeeks(1)" />
+		  <field name="toDate" expr="eval:__date__" />
+ 	 </action-record>
+</object-views>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_4.2.xsd">
+
+	<grid name="order-grid" title="Order List" model="com.axelor.sales.db.Order">
+		<field name="name"/>
+		<field name="customer"/>				
+		<field name="orderDate"/>
+		<field name="totalAmount"/>
+		<field name="state"/>
+	</grid>
+	
+	<selection name="com.axelor.sales.state">
+		<option value="Draft">Draft</option>
+		<option value="Quatation">Quatation</option>
+		<option value="Confirm">Confirm</option>
+		<option value="Complete">Complete</option>
+		<option value="Cancel">Cancel</option>
+	</selection>
+
+	<form name="order-form" title="Order" model="com.axelor.sales.db.Order" onNew="com.axelor.order.default" onSave="com.axelor.sales.validData">
+	
+		
+		<panel title="Order Details" css="panel-blue">
+			<field name="name"/>
+			<field name="createDate" readonlyIf="state == 'Confirm' || state == 'Complete' || state == 'Cancel'" onChange="com.axelor.order.createdatecheck"/>
+			<field name="customer" required="true" title="Customer" readonlyIf="state == 'Confirm' || state == 'Complete' || state == 'Cancel'" form-view="contact-form" grid-view="contact-grid"/>		
+			<field name="orderDate" readonlyIf="state == 'Confirm' || state == 'Complete' || state == 'Cancel'" onChange="com.axelor.order.orderdatecheck"/>
+			<field name="confirmDate" hidden="true" readonly="true" onChange="com.axelor.order.confirmDateCheck" colSpan="12" />
+			<field name="state" title="State" readonly="true" widget="NavSelect"  colSpan="12" selection="com.axelor.sales.state"/>
+		</panel>
+
+		<panel-related field="items" readonlyIf="state == 'Confirm' || state == 'Complete' || state == 'Cancel'"  css="panel-purple" editable="true" onChange="com.axelor.sales.web.SalesOrderController:calculateOrder">
+			    <field name="product" />
+			    <field name="price" />
+			    <field name="quantity" />
+				<field name="tax" />
+		</panel-related>
+		<panel css="panel-green">
+				<panel showTitle="false" colSpan="4" itemSpan="12">
+					<button name="totalAmount" css="btn-success" icon="fa-bar-chart" widget="info-button" title="Total Amount" onClick="com.axelor.sales.validData,com.axelor.sales.web.SalesOrderController:calculateOrder,save"/>
+				</panel>
+				
+				<panel showTitle="false" css="order-subtotal" readonly="true" colSpan="8">
+					<field name="totalAmount" showTitle="false" colSpan="12">
+					<viewer>
+						<![CDATA[
+						<dl class="dl-horizontal">
+							<dt x-translate>Amount</dt>
+							<dd>{{record.amount}}</dd>
+							<dt x-translate>Tax Amount</dt>
+							<dd>{{record.taxAmount}}</dd>
+							<dt class="order-subtotal-total">Total Amount</dt>
+							<dd class="order-subtotal-total">{{record.totalAmount}}</dd>
+						</dl>
+						]]>
+					</viewer>
+				</field>	
+				</panel>
+		</panel>
+		<panel sidebar="true" css="panle-black" showIf="state == 'Draft' || state == 'Quatation' || state == 'Confirm' ||  state == 'Cancel'">
+				<button name="Draft" title="Draft" showIf="state == 'Cancel'" onClick="com.axelor.state.cancelToDraft,com.axelor.sales.gotoDraft" />
+			    <button name="Quatation" title="Quatation" showIf="state == 'Draft'" onClick="com.axelor.state.draftNotify,com.axelor.sales.gotoQuatation,save"/>
+			    <button name="Confirm" title="Confirm" showIf="state == 'Quatation'" onClick="com.axelor.sales.web.SalesOrderController:invoiceAdd,com.axelor.sales.showInvoice,com.axelor.order.defaultConfirmDate,com.axelor.state.quatationNotify,com.axelor.sales.gotoConfirm,com.axelor.sales.requiredDate,save"/>
+			    <button name="Complete" title="Complete" showIf="state == 'Confirm'" onClick="save,com.axelor.state.confirmNotify,com.axelor.sales.gotoComplete,order-invoice"/>
+			    <button name="Cancel" title="Cancel" showIf="state == 'Draft' || state == 'Quatation' || state == 'Confirm'"  onClick="com.axelor.sales.onCallConfirm,com.axelor.alert.Cancel,com.axelor.sales.gotoCancel,save,com.axelor.sales.cancelDate"/>
+		</panel>
+		<panel sidebar="true" css="panel-pink">
+			<field name="createdOn"/>
+			<field name="createdBy"/>
+			<field name="updatedOn"/>
+			<field name="updatedBy"/>
+		</panel>
+		<panel sidebar="true" css="panel-purple" showIf="state == 'Confirm' || state == 'Complete'">
+			<button name="invoice" title="Show Invoice" onClick="order-invoice"/>
+			<field name="invoice" showTitle="false" readonly="true"/>
+		</panel>
+		<panel css="panel-purple" title="Invoice Amount" showIf="state == 'Confirm' || state == 'Complete'">
+			<field name="invoice.invoiceTotalAmount" showTitle="false" readonly="true">
+				<viewer><![CDATA[
+				<dl class="dl-horizontal">
+					<h1>{{record.invoice.invoiceTotalAmount}}</h1>
+				</dl>	
+				]]>				
+				</viewer>
+			</field>
+		</panel>
+		
+	</form>
+
+	
+	
+	<action-record name="com.axelor.order.default" model="com.axelor.sales.db.Order">
+		<field name="createDate" expr="eval: __date__"/>
+		<field name="orderDate" expr="eval: __date__"/>
+		<field name="confirmDate" expr="eval: __date__"/>
+		<field name="state" expr="Draft"/>
+	</action-record>
+	<action-condition name="com.axelor.order.createdatecheck">
+		<check field="createDate" if="createDate &lt; __date__" error="Date must be in future"/>
+		<check field="createDate" if="createDate &lt; orderDate" error="Date must be grater than orderDate"/>
+	</action-condition>
+	
+	<action-record name="com.axelor.order.defaultConfirmDate" model="com.axelor.sales.db.Order">
+		<field name="confirmDate" expr="eval: __date__"/>
+	</action-record>
+	<action-condition name="com.axelor.order.confirmDateCheck">
+		<check field="orderDate"/>
+		<check field="confirmDate" if="confirmDate &lt; orderDate" error="Date must be in future"/>
+	</action-condition>	
+	
+	<action-condition name="com.axelor.order.orderdatecheck">
+		<check field="orderDate" if="orderDate &gt; __date__" error="Date must be in future"/>
+	</action-condition>
+	
+	<action-record name="com.axelor.sales.gotoQuatation" model="com.axelor.sales.db.Order">
+		<field name="state" expr="Quatation" if="__self__.state == 'Draft'"/>	
+	</action-record>
+	<action-record name="com.axelor.sales.gotoConfirm" model="com.axelor.sales.db.Order">
+		<field name="state" expr="Confirm" if="__self__.state == 'Quatation'"/>
+	</action-record>
+	
+	<action-record name="com.axelor.sales.gotoComplete" model="com.axelor.sales.db.Order">
+		<field name="state" expr="Complete" if="__self__.state == 'Confirm'"/>
+	</action-record>
+	
+	<action-record name="com.axelor.sales.gotoCancel" model="com.axelor.sales.db.Order">
+		<field name="items" expr="call:com.axelor.sales.web.SalesOrderController:emptyDraft" if="__self__.state == 'Draft' || state == 'Draft'"/>
+		<field name="items" expr="save" if="__self__.state == 'Draft' || state == 'Draft'" />
+		<field name="amount" expr="0.0000" if="__self__.state == 'Draft'"/>
+		<field name="taxAmount" expr="0.0000" if="__self__.state == 'Draft'"/>
+		<field name="totalAmount" expr="0.0000" if="__self__.state == 'Draft'"/>
+		
+		<field name="state" expr="Cancel" if="__self__.state == 'Draft' || __self__.state == 'Quatation'"/>
+		<field name="state" expr="Draft" if="__self__.state == 'Confirm'"/>
+		<field name="state" expr="Draft" if="state == 'Confirm'"/>
+	</action-record>
+	<action-record name="com.axelor.sales.gotoDraft" model="com.axelor.sales.db.Order">
+		<field name="state" expr="Draft"/>
+	</action-record>
+	
+	<action-validate name="com.axelor.sales.validData">
+		<error message="No order items" if="!items &amp;&amp; state != 'Cancel'"/>
+	</action-validate>
+	
+	<action-attrs name="com.axelor.sales.requiredDate">
+		<attribute name="hidden" for="confirmDate" expr="false"/>
+		<attribute name="required" for="confirmDate" expr="true" if="state == 'Confirm'"/>
+	</action-attrs>
+	<action-attrs name="com.axelor.sales.cancelDate">
+		<attribute name="hidden" for="confirmDate" expr="true"/>
+		<attribute name="required" for="confirmDate" expr="false"/>
+	</action-attrs>
+	
+	<action-record name="com.axelor.sales.showInvoice" model="com.axelor.sales.db.Order">
+		<field name="state" expr="action:com.axelor.sales.show" if="__self__.state == 'Confirm'"/>	
+	</action-record>
+	<action-attrs name="com.axelor.sales.show">
+		<attribute name="hidden" for="invoice" expr="false"/>
+	</action-attrs>	
+	
+
+	<action-validate name="com.axelor.alert.Cancel">
+		<alert message="Are you sure you want to cancel" if=" state == 'Confirm' "/>
+	</action-validate>
+	
+	<action-validate name="com.axelor.state.cancelToDraft">
+		<notify message="Please save" if="state == 'Cancel' &amp;&amp; __self__.state == 'Draft'"/>
+	</action-validate>
+	<action-validate name="com.axelor.state.draftNotify">
+		<notify message="Please save" if="__self__.state != 'Draft'"/>
+	</action-validate>
+	<action-validate name="com.axelor.state.quatationNotify">
+		<notify message="Please save" if="__self__.state != 'Quatation'"/>
+	</action-validate>
+	<action-validate name="com.axelor.state.confirmNotify">
+		<notify message="Please save" if="__self__.state != 'Confirm'"/>
+	</action-validate>
+	<action-validate name="com.axelor.state.complateNotify">
+		<notify message="Please save" if="__self__.state != 'Complete'"/>
+	</action-validate>
+	<action-validate name="com.axelor.state.cancelNotify">
+		<notify message="Please save" if="__self__.state != 'Cancel'"/>
+	</action-validate>
+	
+	<action-record name="com.axelor.sales.onCallConfirm" model="com.axelor.sales.db.Order"> 
+		<field name="cancel" expr="call:com.axelor.sales.web.SalesOrderController:invoiceDelete" if="state == 'Confirm'"/>
+	</action-record>
+
+</object-views>
+
+

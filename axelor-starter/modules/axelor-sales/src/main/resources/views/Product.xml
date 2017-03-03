@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_4.1.xsd">
+
+	<grid name="product-grid" title="Product List" model="com.axelor.sales.db.Product">
+		<field name="code"/>
+		<field name="name"/>
+		<field name="color"/>
+		<field name="color_variant"/>
+		<field name="catagory"/>		
+	</grid>
+	
+	<selection name="com.axelor.product.color">
+		<option value="White">White</option>
+		<option value="Black">Black</option>
+		<option value="Pink">Pink</option>
+		<option value="Purple">Purple</option>
+		<option value="Yellow">Yellow</option>
+		<option value="Blue">Blue</option>
+	</selection>
+
+
+	<form name="product-form" title="Product" model="com.axelor.sales.db.Product">
+		<panel title="Overview" css="panel-blue">	
+				<panel colSpan="3">
+					<field name="image" colSpan="12" showTitle="false" widget="image"/>
+				</panel>
+				<panel colSpan="9">
+					<field name="code"/>
+					<field name="name"/>
+					<field name="color" selection="com.axelor.product.color"/>
+					<field name="color_variant" widget="multi-select" selection="com.axelor.product.color"/>
+					<field name="catagory"/>
+				</panel>
+		</panel>	
+		<panel title="Notes" css="panel-pink">
+				<field name="note" colSpan="12" showTitle="false" widget="html"/>
+		</panel>
+		<panel sidebar="true">
+			<field name="createdOn"/>
+			<field name="createdBy"/>
+			<field name="updatedOn"/>
+			<field name="updatedBy"/>
+		</panel>
+	</form>
+
+</object-views>

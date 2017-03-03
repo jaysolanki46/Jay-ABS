@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_4.2.xsd">
+
+  <menuitem name="menu-contact" order="-998" title="Address Book"
+    icon="fa-book" />
+  <menuitem name="menu-contact-config" title="Configuration"
+    parent="menu-contact" order="10" />
+
+  <menuitem name="menu-contact-all" parent="menu-contact"
+    title="All Contacts" action="contacts.all" />
+    
+  <menuitem name="menu-contact-friends" parent="menu-contact"
+    title="My Friends" action="contacts.friends" />
+  <menuitem name="menu-contact-family" parent="menu-contact"
+    title="My Family" action="contacts.family" />
+  
+  <menuitem name="menu-contact-titles" parent="menu-contact-config"
+    title="Titles" action="titles.all" />
+
+  <action-view name="contacts.all" title="All Contacts"
+    model="com.axelor.contact.db.Contact">
+    <view type="grid" name="contact-grid" />
+    <view type="form" name="contact-form" />
+  </action-view>
+  
+  <action-view name="contacts.friends" title="My Friends"
+    model="com.axelor.contact.db.Contact">
+    <view type="grid" name="contact-grid" />
+    <view type="form" name="contact-form" />
+    <domain>self.circles.code = 'friends'</domain>
+  </action-view>
+  
+  <action-view name="contacts.family" title="My Family"
+    model="com.axelor.contact.db.Contact">
+    <view type="grid" name="contact-grid" />
+    <view type="form" name="contact-form" />
+    <domain>self.circles.code = 'family'</domain>
+  </action-view>
+
+  <action-view name="titles.all" title="All Titles"
+    model="com.axelor.contact.db.Title">
+    <view type="grid" name="title-grid" />
+    <view type="form" name="title-form" />
+  </action-view>
+
+</object-views>

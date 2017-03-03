@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_4.2.xsd">
+
+	<menuitem name="menu-sales" order="-999" title="Sales Management" icon="fa-shopping-cart"  icon-background="yellow"/>
+
+		 <menuitem name="menu-product" order="-850" parent="menu-sales"
+	    	title="Products" action="product.all"/>
+	    		
+	     <action-view name="product.all" title="Product" model="com.axelor.sales.db.Product" >
+	    	<view type="grid" name="product-grid"/>
+		    <view type="form" name="product-form"/>
+		</action-view>
+		
+		 <menuitem name="menu-order" order="-840" parent="menu-sales"
+	    	title="Order" action="order.all"/>
+	    		
+	     <action-view name="order.all" title="Order" model="com.axelor.sales.db.Order" >
+	    	<view type="grid" name="order-grid"/>
+		    <view type="form" name="order-form"/>
+		</action-view>
+		
+		<menuitem name="menu-invoice" order="-820"  parent="menu-sales"
+	    	title="Invoice" action="invoice.all"/>
+	    	
+	     <action-view name="invoice.all" title="Invoice" model="com.axelor.sales.db.Invoice" >
+	    	 <view type="grid" name="invoice-grid"/>
+		    <view type="form" name="invoice-form"/>
+		</action-view>		
+
+		<menuitem name="menu-sales-configuration" parent="menu-sales"
+	    	title="Configuration"/>
+	    	
+	    <menuitem name="menu-tax" parent="menu-sales-configuration"
+	    	title="All Taxes" action="tax.all"/>
+	    		
+	     <action-view name="tax.all" title="Taxes" model="com.axelor.sales.db.Tax" >
+	    	<view type="grid" name="tax-grid"/>
+		    <view type="form" name="tax-form"/>
+		</action-view>
+		
+		 <menuitem name="menu-productcatagory" parent="menu-sales-configuration"
+	    	title="Product Catagory" action="productcatagory.all"/>
+	    		
+	     <action-view name="productcatagory.all" title="Product Catagory" model="com.axelor.sales.db.ProductCatagory" >
+	    	<view type="grid" name="productcatagory-grid"/>
+		    <view type="form" name="productcatagory-form"/>
+		</action-view>
+		
+		<action-view name="order-invoice" title="Invoice" model="com.axelor.sales.db.Invoice">
+			<view type="form" name="invoice-form"/>
+			<context name="_showRecord" expr="eval: __self__.invoice.id" />
+		</action-view>
+</object-views>
